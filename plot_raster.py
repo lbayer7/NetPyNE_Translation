@@ -24,7 +24,7 @@ inhTime = []
 reTime = [] 
 tcTime = [] 
 
-filename = 'raster_test.pkl'
+filename = 'raster_s3.pkl'
 infile = open(filename, 'rb')
 test = pickle.load(infile)
 infile.close()
@@ -49,8 +49,9 @@ for i_len in range(len(spk_times_arr)):
         tcTime.append(spk_times_arr[i_len])
 
 plt.figure() 
-plt.title('NP_v4_awake_post_summer', loc = 'center')
+plt.title('NP_v4_s3', loc = 'center')
 plt.scatter(pyrTime, pyrList, marker='o', s=5, color='red')
 plt.scatter(inhTime, inhList, marker='o', s=5, color='blue')
 plt.scatter(reTime, reList, marker='o', s=5, color='green')
 plt.scatter(tcTime, tcList, marker='o', s=5, color='orange')
+plt.show()
