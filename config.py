@@ -5,7 +5,7 @@ Created on Mon Jul  1 22:47:31 2019
 @author: finkt with modifications by Logan Bayer
 """
 
-from neuron import h, gui
+from neuron import h#, gui
 #from matplotlib import pyplot
 #import numpy as np
 

@@ -14,7 +14,7 @@ simConfig = specs.SimConfig()
 simConfig.oneSynPerNetcon = False # Allows for mutliple synapses to connect to one NetCon 
 netParams.defaultThreshold = 0 # mV, setting early as NetPyNE's deafault is -10 mV, whereas NEURON in 0 mV
 raster_filename = 'raster_test_again.pkl' # raster_filename located here to change raster names quickly as the rest of the code should remain constant
-config.NP_fac = 0.8 # used for the time being to alter AMPA_d2 synaptic weights for each sleep state (lines 169, 170, and 172) as well as pyr2pyr_nmda_d1_str (line 111)
+# config.NP_fac = 0.8 # used for the time being to alter AMPA_d2 synaptic weights for each sleep state (lines 169, 170, and 172) as well as pyr2pyr_nmda_d1_str (line 111)
 # config.NP_fac=0.8 should be the default
 
 NPyr = config.Npyr # number of pyramidal cells in network 

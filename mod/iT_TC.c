@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "scoplib_ansi.h"
+#include "scoplib.h"
 #undef PI
 #define nil 0
 #include "md1redef.h"
@@ -33,9 +33,9 @@ extern double hoc_Exp(double);
 #define evaluate_fct evaluate_fct__it_tc 
  
 #define _threadargscomma_ _p, _ppvar, _thread, _nt,
-#define _threadargsprotocomma_ double* _p, Datum* _ppvar, Datum* _thread, _NrnThread* _nt,
+#define _threadargsprotocomma_ double* _p, Datum* _ppvar, Datum* _thread, NrnThread* _nt,
 #define _threadargs_ _p, _ppvar, _thread, _nt
-#define _threadargsproto_ double* _p, Datum* _ppvar, Datum* _thread, _NrnThread* _nt
+#define _threadargsproto_ double* _p, Datum* _ppvar, Datum* _thread, NrnThread* _nt
  	/*SUPPRESS 761*/
 	/*SUPPRESS 762*/
 	/*SUPPRESS 763*/
@@ -142,15 +142,15 @@ extern void hoc_reg_nmodl_filename(int, const char*);
 };
  static double _sav_indep;
  static void nrn_alloc(Prop*);
-static void  nrn_init(_NrnThread*, _Memb_list*, int);
-static void nrn_state(_NrnThread*, _Memb_list*, int);
- static void nrn_cur(_NrnThread*, _Memb_list*, int);
-static void  nrn_jacob(_NrnThread*, _Memb_list*, int);
+static void  nrn_init(NrnThread*, _Memb_list*, int);
+static void nrn_state(NrnThread*, _Memb_list*, int);
+ static void nrn_cur(NrnThread*, _Memb_list*, int);
+static void  nrn_jacob(NrnThread*, _Memb_list*, int);
  
 static int _ode_count(int);
 static void _ode_map(int, double**, double**, double*, Datum*, double*, int);
-static void _ode_spec(_NrnThread*, _Memb_list*, int);
-static void _ode_matsol(_NrnThread*, _Memb_list*, int);
+static void _ode_spec(NrnThread*, _Memb_list*, int);
+static void _ode_matsol(NrnThread*, _Memb_list*, int);
  
 #define _cvode_ieq _ppvar[4]._i
  static void _ode_matsol_instance1(_threadargsproto_);
@@ -205,7 +205,7 @@ static void nrn_alloc(Prop* _prop) {
  static void _update_ion_pointer(Datum*);
  extern Symbol* hoc_lookup(const char*);
 extern void _nrn_thread_reg(int, int, void(*)(Datum*));
-extern void _nrn_thread_table_reg(int, void(*)(double*, Datum*, Datum*, _NrnThread*, int));
+extern void _nrn_thread_table_reg(int, void(*)(double*, Datum*, Datum*, NrnThread*, int));
 extern void hoc_register_tolerance(int, HocStateTolerance*, Symbol***);
 extern void _cvode_abstol( Symbol**, double*, int);
 
@@ -231,12 +231,16 @@ extern void _cvode_abstol( Symbol**, double*, int);
  	hoc_register_cvode(_mechtype, _ode_count, _ode_map, _ode_spec, _ode_matsol);
  	hoc_register_tolerance(_mechtype, _hoc_state_tol, &_atollist);
  	hoc_register_var(hoc_scdoub, hoc_vdoub, hoc_intfunc);
- 	ivoc_help("help ?1 it_tc C:/Users/Logan/Desktop/Research2020/NP_Model_v4/mod/iT_TC.mod\n");
+ 	ivoc_help("help ?1 it_tc iT_TC.mod\n");
  hoc_register_limits(_mechtype, _hoc_parm_limits);
  hoc_register_units(_mechtype, _hoc_parm_units);
  }
- static double FARADAY = 96485.3;
- static double R = 8.3145;
+ 
+#define FARADAY _nrnunit_FARADAY[_nrnunit_use_legacy_]
+static double _nrnunit_FARADAY[2] = {0x1.78e555060882cp+16, 96485.3}; /* 96485.3321233100141 */
+ 
+#define R _nrnunit_R[_nrnunit_use_legacy_]
+static double _nrnunit_R[2] = {0x1.0a1013e8990bep+3, 8.3145}; /* 8.3144626181532395 */
 static int _reset;
 static char *modelname = "Low threshold calcium current for TC cells";
 
@@ -252,21 +256,21 @@ static int _ode_spec1(_threadargsproto_);
  static int castate(_threadargsproto_);
  
 /*CVODE*/
- static int _ode_spec1 (double* _p, Datum* _ppvar, Datum* _thread, _NrnThread* _nt) {int _reset = 0; {
+ static int _ode_spec1 (double* _p, Datum* _ppvar, Datum* _thread, NrnThread* _nt) {int _reset = 0; {
    evaluate_fct ( _threadargscomma_ v ) ;
    Dm = ( m_inf - m ) / tau_m ;
    Dh = ( h_inf - h ) / tau_h ;
    }
  return _reset;
 }
- static int _ode_matsol1 (double* _p, Datum* _ppvar, Datum* _thread, _NrnThread* _nt) {
+ static int _ode_matsol1 (double* _p, Datum* _ppvar, Datum* _thread, NrnThread* _nt) {
  evaluate_fct ( _threadargscomma_ v ) ;
  Dm = Dm  / (1. - dt*( ( ( ( - 1.0 ) ) ) / tau_m )) ;
  Dh = Dh  / (1. - dt*( ( ( ( - 1.0 ) ) ) / tau_h )) ;
   return 0;
 }
  /*END CVODE*/
- static int castate (double* _p, Datum* _ppvar, Datum* _thread, _NrnThread* _nt) { {
+ static int castate (double* _p, Datum* _ppvar, Datum* _thread, NrnThread* _nt) { {
    evaluate_fct ( _threadargscomma_ v ) ;
     m = m + (1. - exp(dt*(( ( ( - 1.0 ) ) ) / tau_m)))*(- ( ( ( m_inf ) ) / tau_m ) / ( ( ( ( - 1.0 ) ) ) / tau_m ) - m) ;
     h = h + (1. - exp(dt*(( ( ( - 1.0 ) ) ) / tau_h)))*(- ( ( ( h_inf ) ) / tau_h ) / ( ( ( ( - 1.0 ) ) ) / tau_h ) - h) ;
@@ -283,7 +287,7 @@ static int  evaluate_fct ( _threadargsprotocomma_ double _lv ) {
  
 static void _hoc_evaluate_fct(void) {
   double _r;
-   double* _p; Datum* _ppvar; Datum* _thread; _NrnThread* _nt;
+   double* _p; Datum* _ppvar; Datum* _thread; NrnThread* _nt;
    if (_extcall_prop) {_p = _extcall_prop->param; _ppvar = _extcall_prop->dparam;}else{ _p = (double*)0; _ppvar = (Datum*)0; }
   _thread = _extcall_thread;
   _nt = nrn_threads;
@@ -294,7 +298,7 @@ static void _hoc_evaluate_fct(void) {
  
 static int _ode_count(int _type){ return 2;}
  
-static void _ode_spec(_NrnThread* _nt, _Memb_list* _ml, int _type) {
+static void _ode_spec(NrnThread* _nt, _Memb_list* _ml, int _type) {
    double* _p; Datum* _ppvar; Datum* _thread;
    Node* _nd; double _v; int _iml, _cntml;
   _cntml = _ml->_nodecount;
@@ -322,7 +326,7 @@ static void _ode_matsol_instance1(_threadargsproto_) {
  _ode_matsol1 (_p, _ppvar, _thread, _nt);
  }
  
-static void _ode_matsol(_NrnThread* _nt, _Memb_list* _ml, int _type) {
+static void _ode_matsol(NrnThread* _nt, _Memb_list* _ml, int _type) {
    double* _p; Datum* _ppvar; Datum* _thread;
    Node* _nd; double _v; int _iml, _cntml;
   _cntml = _ml->_nodecount;
@@ -343,7 +347,7 @@ static void _ode_matsol(_NrnThread* _nt, _Memb_list* _ml, int _type) {
    nrn_update_ion_pointer(_ca_sym, _ppvar, 3, 4);
  }
 
-static void initmodel(double* _p, Datum* _ppvar, Datum* _thread, _NrnThread* _nt) {
+static void initmodel(double* _p, Datum* _ppvar, Datum* _thread, NrnThread* _nt) {
   int _i; double _save;{
   h = h0;
   m = m0;
@@ -358,7 +362,7 @@ static void initmodel(double* _p, Datum* _ppvar, Datum* _thread, _NrnThread* _nt
 }
 }
 
-static void nrn_init(_NrnThread* _nt, _Memb_list* _ml, int _type){
+static void nrn_init(NrnThread* _nt, _Memb_list* _ml, int _type){
 double* _p; Datum* _ppvar; Datum* _thread;
 Node *_nd; double _v; int* _ni; int _iml, _cntml;
 #if CACHEVEC
@@ -384,7 +388,7 @@ for (_iml = 0; _iml < _cntml; ++_iml) {
  }
 }
 
-static double _nrn_current(double* _p, Datum* _ppvar, Datum* _thread, _NrnThread* _nt, double _v){double _current=0.;v=_v;{ {
+static double _nrn_current(double* _p, Datum* _ppvar, Datum* _thread, NrnThread* _nt, double _v){double _current=0.;v=_v;{ {
    carev = ( 1e3 ) * ( R * 309.15 ) / ( 2.0 * FARADAY ) * log ( cao / cai ) ;
    ica = gcabar * m * m * h * ( v - carev ) ;
    }
@@ -393,7 +397,7 @@ static double _nrn_current(double* _p, Datum* _ppvar, Datum* _thread, _NrnThread
 } return _current;
 }
 
-static void nrn_cur(_NrnThread* _nt, _Memb_list* _ml, int _type) {
+static void nrn_cur(NrnThread* _nt, _Memb_list* _ml, int _type) {
 double* _p; Datum* _ppvar; Datum* _thread;
 Node *_nd; int* _ni; double _rhs, _v; int _iml, _cntml;
 #if CACHEVEC
@@ -435,7 +439,7 @@ for (_iml = 0; _iml < _cntml; ++_iml) {
  
 }
 
-static void nrn_jacob(_NrnThread* _nt, _Memb_list* _ml, int _type) {
+static void nrn_jacob(NrnThread* _nt, _Memb_list* _ml, int _type) {
 double* _p; Datum* _ppvar; Datum* _thread;
 Node *_nd; int* _ni; int _iml, _cntml;
 #if CACHEVEC
@@ -459,7 +463,7 @@ for (_iml = 0; _iml < _cntml; ++_iml) {
  
 }
 
-static void nrn_state(_NrnThread* _nt, _Memb_list* _ml, int _type) {
+static void nrn_state(NrnThread* _nt, _Memb_list* _ml, int _type) {
 double* _p; Datum* _ppvar; Datum* _thread;
 Node *_nd; double _v = 0.0; int* _ni; int _iml, _cntml;
 #if CACHEVEC
